@@ -22,52 +22,32 @@ function App() {
 }
 
 function Accordion({ data }) {
-  const [curOpen, setCurOpen] = useState(null);
-
   return (
     <div className="accordion">
       {data.map((faq, i) => (
         <AccordionItem
           key={faq.title}
-          curOpen={curOpen}
-          onOpen={setCurOpen}
           num={(i + 1).toString().padStart(2, 0)}
           question={faq.title}
-        >
-          {faq.text}
-        </AccordionItem>
+          answer={faq.text}
+        />
       ))}
-
-      <AccordionItem
-        key="Thinking in React"
-        curOpen={curOpen}
-        onOpen={setCurOpen}
-        num="23"
-        question="Thinking in React?"
-      >
-        <p>Allows React developers to:</p>
-        <ul>
-          <li>Break up UI into components</li>
-          <li>Make components reusable</li>
-          <li>Place state efficiently</li>
-        </ul>
-      </AccordionItem>
     </div>
   );
 }
 
-function AccordionItem({ num, question, curOpen, onOpen, children }) {
-  const isOpen = num === curOpen;
+function AccordionItem({ num, question, answer }) {
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div
       className={`item ${isOpen ? 'open' : ''}`}
-      onClick={() => onOpen(isOpen ? null : num)}
+      onClick={() => setIsOpen((open) => !open)}
     >
       <p className="number">{num}</p>
       <p className="title">{question}</p>
       <p className="icon">{isOpen ? '-' : '+'}</p>
-      {isOpen && <div className="content-box">{children}</div>}
+      {isOpen && <div className="content-box">{answer}</div>}
     </div>
   );
 }
