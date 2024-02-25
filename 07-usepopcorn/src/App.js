@@ -54,7 +54,7 @@ const average = (arr) =>
 const KEY = 'df0b561d';
 
 export default function App() {
-  const [query, setQuery] = useState('inception');
+  const [query, setQuery] = useState('');
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -122,7 +122,7 @@ export default function App() {
           setMovies(data.Search);
           setError('');
         } catch (err) {
-          console.error(err.message);
+          console.log(err.message);
 
           if (err.name !== 'AbortError') {
             setError(err.message);
@@ -138,6 +138,7 @@ export default function App() {
         return;
       }
 
+      handleCloseMovie();
       fetchMovies();
 
       return function () {
@@ -355,6 +356,21 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
 
   useEffect(
     function () {
+      const handleEsc = function (e) {
+        if (e.code !== 'Escape') return;
+
+        onCloseMovie();
+      };
+
+      document.addEventListener('keydown', handleEsc);
+
+      return () => document.removeEventListener('keydown', handleEsc);
+    },
+    [onCloseMovie]
+  );
+
+  useEffect(
+    function () {
       const controller = new AbortController();
 
       async function getMovieDetails(id) {
@@ -377,7 +393,8 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
           setMovie(data);
           setError('');
         } catch (err) {
-          console.error(err.message);
+          console.log(err.message);
+
           if (err.name !== 'AbortError') {
             setError(err.message);
           }
