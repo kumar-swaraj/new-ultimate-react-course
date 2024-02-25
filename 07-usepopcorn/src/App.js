@@ -98,13 +98,18 @@ export default function App() {
 
   useEffect(
     function () {
+      const controller = new AbortController();
+
       async function fetchMovies() {
         try {
           setIsLoading(true);
           setError('');
 
           const res = await fetch(
-            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
+            {
+              signal: controller.signal,
+            }
           );
 
           if (!res.ok)
@@ -115,9 +120,13 @@ export default function App() {
           if (data.Response === 'False') throw new Error(data.Error);
 
           setMovies(data.Search);
+          setError('');
         } catch (err) {
           console.error(err.message);
-          setError(err.message);
+
+          if (err.name !== 'AbortError') {
+            setError(err.message);
+          }
         } finally {
           setIsLoading(false);
         }
@@ -130,6 +139,10 @@ export default function App() {
       }
 
       fetchMovies();
+
+      return function () {
+        controller.abort();
+      };
     },
     [query]
   );
@@ -342,13 +355,18 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
 
   useEffect(
     function () {
+      const controller = new AbortController();
+
       async function getMovieDetails(id) {
         try {
           setIsLoading(true);
           setError('');
 
           const res = await fetch(
-            `http://www.omdbapi.com/?apikey=${KEY}&i=${id}`
+            `http://www.omdbapi.com/?apikey=${KEY}&i=${id}`,
+            {
+              signal: controller.signal,
+            }
           );
 
           if (!res.ok)
@@ -357,14 +375,19 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
           const data = await res.json();
 
           setMovie(data);
+          setError('');
         } catch (err) {
           console.error(err.message);
-          setError(err.message);
+          if (err.name !== 'AbortError') {
+            setError(err.message);
+          }
         } finally {
           setIsLoading(false);
         }
       }
       getMovieDetails(selectedId);
+
+      return () => controller.abort();
     },
     [selectedId]
   );
