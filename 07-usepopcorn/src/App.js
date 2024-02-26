@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import StarRating from './StarRating';
 import { useMovies } from './useMovies';
 import { useLocalStorageState } from './useLocalStorageState';
+import { useKey } from './useKey';
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
@@ -112,25 +113,12 @@ function Search({ query, setQuery }) {
 
   const inputEl = useRef(null);
 
-  useEffect(
-    function () {
-      function callback(e) {
-        if (e.code !== 'Enter') return;
-        if (document.activeElement === inputEl.current) return;
+  useKey('Enter', function () {
+    if (document.activeElement === inputEl.current) return;
 
-        setQuery('');
-        inputEl.current.focus();
-      }
-
-      document.addEventListener('keydown', callback);
-
-      // console.log(inputEl.current);
-      inputEl.current.focus();
-
-      return () => document.removeEventListener('keydown', callback);
-    },
-    [setQuery]
-  );
+    setQuery('');
+    inputEl.current.focus();
+  });
 
   return (
     <input
@@ -263,20 +251,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     // setAvgRating((rating) => (rating + userRating) / 2);
   }
 
-  useEffect(
-    function () {
-      const handleEsc = function (e) {
-        if (e.code !== 'Escape') return;
-
-        onCloseMovie();
-      };
-
-      document.addEventListener('keydown', handleEsc);
-
-      return () => document.removeEventListener('keydown', handleEsc);
-    },
-    [onCloseMovie]
-  );
+  useKey('Escape', onCloseMovie);
 
   useEffect(
     function () {
